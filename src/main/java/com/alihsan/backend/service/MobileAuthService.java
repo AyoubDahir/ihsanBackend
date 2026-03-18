@@ -24,6 +24,7 @@ public class MobileAuthService {
 
     private final PrimeWorkflowService primeWorkflowService;
     private final AuthOtpSessionRepository authOtpSessionRepository;
+    private final SmsService smsService;
     private final int otpTtlSeconds;
     private final int otpMaxAttempts;
     private final boolean returnOtpInResponse;
@@ -31,12 +32,14 @@ public class MobileAuthService {
     public MobileAuthService(
         PrimeWorkflowService primeWorkflowService,
         AuthOtpSessionRepository authOtpSessionRepository,
+        SmsService smsService,
         @Value("${auth.otp.ttl-seconds:300}") int otpTtlSeconds,
         @Value("${auth.otp.max-attempts:5}") int otpMaxAttempts,
-        @Value("${auth.otp.return-in-response:true}") boolean returnOtpInResponse
+        @Value("${auth.otp.return-in-response:false}") boolean returnOtpInResponse
     ) {
         this.primeWorkflowService = primeWorkflowService;
         this.authOtpSessionRepository = authOtpSessionRepository;
+        this.smsService = smsService;
         this.otpTtlSeconds = otpTtlSeconds;
         this.otpMaxAttempts = otpMaxAttempts;
         this.returnOtpInResponse = returnOtpInResponse;
@@ -77,16 +80,18 @@ public class MobileAuthService {
             throw new IllegalArgumentException("Patient with this mobile does not exist. Complete signup first.");
         }
 
+        String otpCode = generateOtp();
+        smsService.sendOtp(normalizedMobile, otpCode);
+
         AuthOtpSession session = new AuthOtpSession();
         session.setMobile(normalizedMobile);
-        session.setOtpCode(generateOtp());
+        session.setOtpCode(otpCode);
         session.setCreatedAt(OffsetDateTime.now());
         session.setExpiresAt(OffsetDateTime.now().plusSeconds(otpTtlSeconds));
         session.setFailedAttempts(0);
         session.setMaxAttempts(otpMaxAttempts);
         authOtpSessionRepository.save(session);
 
-        // SMS provider integration can be plugged in here; currently we log only.
         log.info("Generated OTP for mobile {} with session {}", normalizedMobile, session.getId());
 
         return new AuthSendOtpResponse(
@@ -94,7 +99,7 @@ public class MobileAuthService {
             normalizedMobile,
             session.getExpiresAt().toString(),
             "VERIFY_OTP",
-            returnOtpInResponse ? session.getOtpCode() : null
+            returnOtpInResponse ? otpCode : null
         );
     }
 

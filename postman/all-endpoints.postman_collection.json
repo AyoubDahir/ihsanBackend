@@ -1,0 +1,251 @@
+{
+  "info": {
+    "_postman_id": "8c95ef89-83c9-4d1f-9e10-cf53a596aa10",
+    "name": "Alihsan Backend - All Endpoints",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "https://api.alihsans.com" },
+    { "key": "mobile", "value": "252614440378" },
+    { "key": "otp", "value": "" },
+    { "key": "patientId", "value": "PID-00001" },
+    { "key": "practitionerId", "value": "DOC-0001" },
+    { "key": "invoiceId", "value": "SINV-0001" },
+    { "key": "referenceId", "value": "" },
+    { "key": "invoiceReferenceId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": ["{{baseUrl}}"],
+          "path": ["health"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Check Mobile",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"{{mobile}}\"\n}" },
+        "url": {
+          "raw": "{{baseUrl}}/api/mobile/auth/check-mobile",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "mobile", "auth", "check-mobile"]
+        }
+      }
+    },
+    {
+      "name": "Auth - Send OTP",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"{{mobile}}\"\n}" },
+        "url": {
+          "raw": "{{baseUrl}}/api/mobile/auth/send-otp",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "mobile", "auth", "send-otp"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j && j.otp) pm.collectionVariables.set('otp', j.otp);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth - Verify OTP",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"{{mobile}}\",\n  \"otp\": \"{{otp}}\"\n}" },
+        "url": {
+          "raw": "{{baseUrl}}/api/mobile/auth/verify-otp",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "mobile", "auth", "verify-otp"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j && j.patientId) pm.collectionVariables.set('patientId', j.patientId);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Healthcare - Practitioners",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/healthcare/practitioners",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "healthcare", "practitioners"]
+        }
+      }
+    },
+    {
+      "name": "Healthcare - Create Appointment (Existing)",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"practitionerId\": \"{{practitionerId}}\",\n  \"appointmentDate\": \"2026-03-19\",\n  \"appointmentTime\": \"10:00:00\",\n  \"department\": \"General Medicine\",\n  \"amount\": 5.00,\n  \"phoneNumber\": \"{{mobile}}\",\n  \"paymentType\": \"EVC\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/healthcare/appointments",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "healthcare", "appointments"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j && j.referenceId) pm.collectionVariables.set('referenceId', j.referenceId);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment - Webhook Approve Appointment",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"referenceId\": \"{{referenceId}}\",\n  \"status\": \"APPROVED\",\n  \"providerTxnId\": \"WAAFI-TXN-APPT-001\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/payment/webhook",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "payment", "webhook"]
+        }
+      }
+    },
+    {
+      "name": "Healthcare - Appointments",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/healthcare/appointments?patientId={{patientId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "healthcare", "appointments"],
+          "query": [{ "key": "patientId", "value": "{{patientId}}" }]
+        }
+      }
+    },
+    {
+      "name": "Healthcare - Lab Reports",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/healthcare/lab-reports?patientId={{patientId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "healthcare", "lab-reports"],
+          "query": [{ "key": "patientId", "value": "{{patientId}}" }]
+        }
+      }
+    },
+    {
+      "name": "Billing - List Invoices",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/billing/invoices?patientId={{patientId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "billing", "invoices"],
+          "query": [{ "key": "patientId", "value": "{{patientId}}" }]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const j = pm.response.json();",
+              "if (Array.isArray(j) && j.length && j[0].invoiceId) pm.collectionVariables.set('invoiceId', j[0].invoiceId);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Billing - Pay Invoice",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"invoiceId\": \"{{invoiceId}}\",\n  \"amount\": 5.00,\n  \"phoneNumber\": \"{{mobile}}\",\n  \"paymentType\": \"EVC\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/billing/pay",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "billing", "pay"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j && j.referenceId) pm.collectionVariables.set('invoiceReferenceId', j.referenceId);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Payment - Webhook Approve Invoice",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"referenceId\": \"{{invoiceReferenceId}}\",\n  \"status\": \"APPROVED\",\n  \"providerTxnId\": \"WAAFI-TXN-INV-001\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/payment/webhook",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "payment", "webhook"]
+        }
+      }
+    },
+    {
+      "name": "Billing - Invoice Payment Status",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/billing/payments/{{invoiceReferenceId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "billing", "payments", "{{invoiceReferenceId}}"]
+        }
+      }
+    }
+  ]
+}

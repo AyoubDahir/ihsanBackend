@@ -30,8 +30,15 @@ auth:
   otp:
     ttl-seconds: ${AUTH_OTP_TTL_SECONDS:300}
     max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
-    # Keep true while testing with Postman; set false in production after SMS delivery is integrated.
-    return-in-response: ${AUTH_OTP_RETURN_IN_RESPONSE:true}
+    return-in-response: ${AUTH_OTP_RETURN_IN_RESPONSE:false}
+
+hormuud:
+  sms:
+    token-url: ${HORMUUD_SMS_TOKEN_URL:https://smsapi.hormuud.com/token}
+    send-url: ${HORMUUD_SMS_SEND_URL:https://smsapi.hormuud.com/api/SendSMS}
+    username: ${HORMUUD_SMS_USERNAME:}
+    password: ${HORMUUD_SMS_PASSWORD:}
+    sender-id: ${HORMUUD_SMS_SENDER_ID:}
 
 logging:
   level:
