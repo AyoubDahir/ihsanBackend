@@ -45,14 +45,15 @@ public class PrimeWorkflowService {
 
     @SuppressWarnings("unchecked")
     public Map<String, String> findPatientByMobile(String mobile) {
-        if (mobile == null || mobile.trim().isEmpty()) {
+        String normalizedMobile = normalizeMobile(mobile);
+        if (normalizedMobile == null || normalizedMobile.isEmpty()) {
             return null;
         }
         Map<String, Object> response = frappeClient.getResource(
             "Patient",
             Map.of(
                 "fields", "[\"name\",\"patient_name\",\"mobile\"]",
-                "filters", "[[\"mobile\",\"=\",\"" + mobile + "\"]]",
+                "filters", "[[\"mobile\",\"=\",\"" + normalizedMobile + "\"]]",
                 "limit_page_length", "1"
             )
         );
@@ -78,7 +79,7 @@ public class PrimeWorkflowService {
         Integer age,
         String ageType
     ) {
-        String normalizedMobile = mobile == null ? null : mobile.trim();
+        String normalizedMobile = normalizeMobile(mobile);
         if (normalizedMobile == null || normalizedMobile.isEmpty()) {
             throw new IllegalArgumentException("mobile is required when patientId is missing");
         }
@@ -265,5 +266,25 @@ public class PrimeWorkflowService {
 
     private String asString(Object val) {
         return val == null ? null : String.valueOf(val);
+    }
+
+    private String normalizeMobile(String mobile) {
+        if (mobile == null) {
+            return null;
+        }
+        String digitsOnly = mobile.replaceAll("\\D", "");
+        if (digitsOnly.isEmpty()) {
+            return "";
+        }
+        if (digitsOnly.startsWith("00")) {
+            digitsOnly = digitsOnly.substring(2);
+        }
+        if (digitsOnly.startsWith("252")) {
+            return digitsOnly;
+        }
+        if (digitsOnly.startsWith("0")) {
+            return "252" + digitsOnly.substring(1);
+        }
+        return digitsOnly;
     }
 }

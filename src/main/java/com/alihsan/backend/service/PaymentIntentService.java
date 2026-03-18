@@ -98,6 +98,13 @@ public class PaymentIntentService {
         if (patientId != null && !patientId.trim().isEmpty()) {
             return patientId.trim();
         }
+        Map<String, String> existingPatient = primeWorkflowService.findPatientByMobile(request.mobile());
+        if (existingPatient != null) {
+            String existingPatientId = existingPatient.get("id");
+            if (existingPatientId != null && !existingPatientId.trim().isEmpty()) {
+                return existingPatientId.trim();
+            }
+        }
         return primeWorkflowService.registerPatientFromMobile(
             request.firstName(),
             request.lastName(),
