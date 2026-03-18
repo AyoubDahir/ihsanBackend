@@ -4,6 +4,7 @@ import com.alihsan.backend.dto.CreateAppointmentIntentRequest;
 import com.alihsan.backend.dto.CreateAppointmentIntentResponse;
 import com.alihsan.backend.dto.LabReportView;
 import com.alihsan.backend.dto.PatientAppointmentView;
+import com.alihsan.backend.dto.PractitionerView;
 import com.alihsan.backend.service.PaymentIntentService;
 import com.alihsan.backend.service.PrimeWorkflowService;
 import jakarta.validation.Valid;
@@ -40,6 +41,11 @@ public class HealthcareController {
     @GetMapping("/appointments")
     public List<PatientAppointmentView> getAppointments(@RequestParam("patientId") String patientId) {
         return primeWorkflowService.getAppointments(patientId);
+    }
+
+    @GetMapping("/practitioners")
+    public List<PractitionerView> getPractitioners(@RequestParam(value = "department", required = false) String department) {
+        return primeWorkflowService.getPractitioners(department);
     }
 
     @GetMapping("/lab-reports")
