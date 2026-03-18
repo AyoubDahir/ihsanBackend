@@ -13,7 +13,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/health", "/api/payment/webhook").permitAll()
+                .requestMatchers("/health", "/api/payment/webhook", "/api/mobile/auth/**").permitAll()
                 .anyRequest().permitAll())
             .httpBasic(Customizer.withDefaults());
         return http.build();

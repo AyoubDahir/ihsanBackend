@@ -5,6 +5,7 @@ import com.alihsan.backend.dto.LabReportView;
 import com.alihsan.backend.dto.PatientAppointmentView;
 import com.alihsan.backend.dto.PractitionerView;
 import com.alihsan.backend.integration.FrappeClient;
+import com.alihsan.backend.util.MobileNumberUtil;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.StringJoiner;
 
 @Service
 public class PrimeWorkflowService {
@@ -45,7 +47,7 @@ public class PrimeWorkflowService {
 
     @SuppressWarnings("unchecked")
     public Map<String, String> findPatientByMobile(String mobile) {
-        String normalizedMobile = normalizeMobile(mobile);
+        String normalizedMobile = MobileNumberUtil.normalize(mobile);
         if (normalizedMobile == null || normalizedMobile.isEmpty()) {
             return null;
         }
@@ -53,7 +55,7 @@ public class PrimeWorkflowService {
             "Patient",
             Map.of(
                 "fields", "[\"name\",\"patient_name\",\"mobile\"]",
-                "filters", "[[\"mobile\",\"=\",\"" + normalizedMobile + "\"]]",
+                "filters", buildMobileLookupFilter(normalizedMobile),
                 "limit_page_length", "1"
             )
         );
@@ -79,7 +81,7 @@ public class PrimeWorkflowService {
         Integer age,
         String ageType
     ) {
-        String normalizedMobile = normalizeMobile(mobile);
+        String normalizedMobile = MobileNumberUtil.normalize(mobile);
         if (normalizedMobile == null || normalizedMobile.isEmpty()) {
             throw new IllegalArgumentException("mobile is required when patientId is missing");
         }
@@ -268,23 +270,18 @@ public class PrimeWorkflowService {
         return val == null ? null : String.valueOf(val);
     }
 
-    private String normalizeMobile(String mobile) {
-        if (mobile == null) {
-            return null;
+    private String buildMobileLookupFilter(String normalizedMobile) {
+        List<String> candidates = new ArrayList<>();
+        candidates.add(normalizedMobile);
+        if (normalizedMobile.startsWith("252") && normalizedMobile.length() > 3) {
+            candidates.add("0" + normalizedMobile.substring(3));
         }
-        String digitsOnly = mobile.replaceAll("\\D", "");
-        if (digitsOnly.isEmpty()) {
-            return "";
+        candidates.add("+" + normalizedMobile);
+
+        StringJoiner joiner = new StringJoiner("\",\"", "[\"", "\"]");
+        for (String candidate : candidates) {
+            joiner.add(candidate);
         }
-        if (digitsOnly.startsWith("00")) {
-            digitsOnly = digitsOnly.substring(2);
-        }
-        if (digitsOnly.startsWith("252")) {
-            return digitsOnly;
-        }
-        if (digitsOnly.startsWith("0")) {
-            return "252" + digitsOnly.substring(1);
-        }
-        return digitsOnly;
+        return "[[\"mobile\",\"in\"," + joiner + "]]";
     }
 }

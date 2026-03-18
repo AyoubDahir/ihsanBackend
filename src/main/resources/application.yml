@@ -26,6 +26,13 @@ waafi:
   api-key: ${WAAFI_API_KEY:}
   channel-name: ${WAAFI_CHANNEL_NAME:WEB}
 
+auth:
+  otp:
+    ttl-seconds: ${AUTH_OTP_TTL_SECONDS:300}
+    max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
+    # Keep true while testing with Postman; set false in production after SMS delivery is integrated.
+    return-in-response: ${AUTH_OTP_RETURN_IN_RESPONSE:true}
+
 logging:
   level:
     org.springframework.web: INFO
