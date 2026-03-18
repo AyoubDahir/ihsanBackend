@@ -1,0 +1,47 @@
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: alihsan-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-alihsan_mobile}
+      MYSQL_USER: ${MYSQL_USER:-alihsan}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-alihsan_password}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root_password}
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -p$${MYSQL_ROOT_PASSWORD} || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: alihsan-java-backend
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PORT: ${APP_PORT:-5000}
+      DB_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-alihsan_mobile}?allowPublicKeyRetrieval=true&useSSL=false&serverTimezone=UTC
+      DB_USER: ${MYSQL_USER:-alihsan}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-alihsan_password}
+      PRIME_BASE_URL: ${PRIME_BASE_URL}
+      PRIME_API_KEY: ${PRIME_API_KEY}
+      PRIME_API_SECRET: ${PRIME_API_SECRET}
+      WAAFI_URL: ${WAAFI_URL:-https://api.waafipay.net/asm}
+      WAAFI_MERCHANT_UID: ${WAAFI_MERCHANT_UID}
+      WAAFI_API_USER_ID: ${WAAFI_API_USER_ID}
+      WAAFI_API_KEY: ${WAAFI_API_KEY}
+      WAAFI_CHANNEL_NAME: ${WAAFI_CHANNEL_NAME:-WEB}
+    ports:
+      - "${APP_PORT:-5000}:5000"
+
+volumes:
+  mysql_data:
