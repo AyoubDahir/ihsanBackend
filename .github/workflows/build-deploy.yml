@@ -60,7 +60,7 @@ jobs:
         with:
           repository: AyoubDahir/argocd
           ref: main
-          token: ${{ secrets.ARGOCD_REPO_TOKEN }}
+          token: ${{ secrets.ARGOCD_REPO_PATT }}
           path: argocd
 
       - name: Update Java backend image tag
