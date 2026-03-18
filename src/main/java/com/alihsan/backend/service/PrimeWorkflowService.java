@@ -3,6 +3,7 @@ package com.alihsan.backend.service;
 import com.alihsan.backend.dto.BillingInvoiceView;
 import com.alihsan.backend.dto.LabReportView;
 import com.alihsan.backend.dto.PatientAppointmentView;
+import com.alihsan.backend.dto.PractitionerSlotView;
 import com.alihsan.backend.dto.PractitionerView;
 import com.alihsan.backend.integration.FrappeClient;
 import com.alihsan.backend.util.MobileNumberUtil;
@@ -149,7 +150,7 @@ public class PrimeWorkflowService {
         Map<String, Object> response = frappeClient.getResource(
             "Healthcare Practitioner",
             Map.of(
-                "fields", "[\"name\",\"practitioner_name\",\"department\",\"op_consulting_charge\",\"disabled\"]",
+                "fields", "[\"name\",\"practitioner_name\",\"department\",\"op_consulting_charge\"]",
                 "filters", filters,
                 "order_by", "modified desc",
                 "limit_page_length", "200"
@@ -158,17 +159,64 @@ public class PrimeWorkflowService {
         List<Map<String, Object>> rows = (List<Map<String, Object>>) response.getOrDefault("data", List.of());
         List<PractitionerView> out = new ArrayList<>();
         for (Map<String, Object> row : rows) {
-            boolean disabled = "1".equals(asString(row.get("disabled")))
-                || "true".equalsIgnoreCase(asString(row.get("disabled")));
             out.add(new PractitionerView(
                 asString(row.get("name")),
                 asString(row.get("practitioner_name")),
                 asString(row.get("department")),
                 asString(row.get("op_consulting_charge")),
-                !disabled
+                true
             ));
         }
         return out;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<PractitionerSlotView> getPractitionerSlots(String practitionerId, String date) {
+        Map<String, Object> response = frappeClient.postMethod(
+            "healthcare.healthcare.doctype.patient_appointment.patient_appointment.get_availability_data",
+            Map.of(
+                "practitioner", practitionerId,
+                "date", date
+            )
+        );
+        Map<String, Object> message = (Map<String, Object>) response.getOrDefault("message", Map.of());
+        List<Map<String, Object>> slotDetails = (List<Map<String, Object>>) message.getOrDefault("slot_details", List.of());
+        List<PractitionerSlotView> slots = new ArrayList<>();
+        for (Map<String, Object> slotDetail : slotDetails) {
+            String slotName = asString(slotDetail.get("slot_name"));
+            String serviceUnit = asString(slotDetail.get("service_unit"));
+            boolean teleConf = asBoolean(slotDetail.get("tele_conf"));
+            boolean allowOverlap = asBoolean(slotDetail.get("allow_overlap"));
+            Integer capacity = asInteger(slotDetail.get("service_unit_capacity"));
+
+            List<Map<String, Object>> bookedAppointments = (List<Map<String, Object>>) slotDetail.getOrDefault("appointments", List.of());
+            List<Map<String, Object>> availSlots = (List<Map<String, Object>>) slotDetail.getOrDefault("avail_slot", List.of());
+            for (Map<String, Object> availSlot : availSlots) {
+                String fromTime = asString(availSlot.get("from_time"));
+                String toTime = asString(availSlot.get("to_time"));
+                int bookedCount = countBookingsAtTime(bookedAppointments, fromTime);
+                boolean available = bookedCount == 0;
+                Integer remainingCapacity = null;
+                if (allowOverlap && capacity != null && capacity > 0) {
+                    remainingCapacity = Math.max(capacity - bookedCount, 0);
+                    available = remainingCapacity > 0;
+                }
+                slots.add(new PractitionerSlotView(
+                    slotName,
+                    serviceUnit,
+                    date,
+                    fromTime,
+                    toTime,
+                    available,
+                    bookedCount,
+                    capacity,
+                    remainingCapacity,
+                    teleConf,
+                    allowOverlap
+                ));
+            }
+        }
+        return slots;
     }
 
     @SuppressWarnings("unchecked")
@@ -268,6 +316,39 @@ public class PrimeWorkflowService {
 
     private String asString(Object val) {
         return val == null ? null : String.valueOf(val);
+    }
+
+    private boolean asBoolean(Object val) {
+        String v = asString(val);
+        return "1".equals(v) || "true".equalsIgnoreCase(v);
+    }
+
+    private Integer asInteger(Object val) {
+        if (val == null) {
+            return null;
+        }
+        try {
+            return (int) Math.round(Double.parseDouble(String.valueOf(val)));
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
+    private int countBookingsAtTime(List<Map<String, Object>> appointments, String fromTime) {
+        if (fromTime == null || appointments == null || appointments.isEmpty()) {
+            return 0;
+        }
+        int count = 0;
+        for (Map<String, Object> appt : appointments) {
+            String apptTime = asString(appt.get("appointment_time"));
+            if (apptTime == null) {
+                continue;
+            }
+            if (apptTime.equals(fromTime)) {
+                count++;
+            }
+        }
+        return count;
     }
 
     private String buildMobileLookupFilter(String normalizedMobile) {

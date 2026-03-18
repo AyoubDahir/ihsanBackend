@@ -2,6 +2,7 @@ package com.alihsan.backend.service;
 
 import com.alihsan.backend.domain.AuthOtpSession;
 import com.alihsan.backend.dto.AuthCheckMobileResponse;
+import com.alihsan.backend.dto.AuthSelfRegisterResponse;
 import com.alihsan.backend.dto.AuthSendOtpResponse;
 import com.alihsan.backend.dto.AuthVerifyOtpResponse;
 import com.alihsan.backend.repository.AuthOtpSessionRepository;
@@ -100,6 +101,52 @@ public class MobileAuthService {
             session.getExpiresAt().toString(),
             "VERIFY_OTP",
             returnOtpInResponse ? otpCode : null
+        );
+    }
+
+    @Transactional
+    public AuthSelfRegisterResponse selfRegister(
+        String firstName,
+        String lastName,
+        String fullName,
+        String mobile,
+        String sex,
+        Integer age,
+        String ageType
+    ) {
+        String normalizedMobile = MobileNumberUtil.normalize(mobile);
+        if (normalizedMobile == null || normalizedMobile.isBlank()) {
+            throw new IllegalArgumentException("mobile is required");
+        }
+
+        Map<String, String> existing = primeWorkflowService.findPatientByMobile(normalizedMobile);
+        if (existing != null) {
+            return new AuthSelfRegisterResponse(
+                false,
+                existing.get("id"),
+                existing.get("name"),
+                normalizedMobile,
+                "SEND_OTP"
+            );
+        }
+
+        String patientId = primeWorkflowService.registerPatientFromMobile(
+            firstName,
+            lastName,
+            fullName,
+            normalizedMobile,
+            sex,
+            age,
+            ageType
+        );
+
+        Map<String, String> patient = primeWorkflowService.findPatientByMobile(normalizedMobile);
+        return new AuthSelfRegisterResponse(
+            true,
+            patientId,
+            patient == null ? null : patient.get("name"),
+            normalizedMobile,
+            "SEND_OTP"
         );
     }
 

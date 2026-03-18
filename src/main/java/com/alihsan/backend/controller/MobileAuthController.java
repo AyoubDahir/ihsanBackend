@@ -4,6 +4,8 @@ import com.alihsan.backend.dto.AuthCheckMobileRequest;
 import com.alihsan.backend.dto.AuthCheckMobileResponse;
 import com.alihsan.backend.dto.AuthSendOtpRequest;
 import com.alihsan.backend.dto.AuthSendOtpResponse;
+import com.alihsan.backend.dto.AuthSelfRegisterRequest;
+import com.alihsan.backend.dto.AuthSelfRegisterResponse;
 import com.alihsan.backend.dto.AuthVerifyOtpRequest;
 import com.alihsan.backend.dto.AuthVerifyOtpResponse;
 import com.alihsan.backend.service.MobileAuthService;
@@ -35,5 +37,18 @@ public class MobileAuthController {
     @PostMapping("/verify-otp")
     public AuthVerifyOtpResponse verifyOtp(@Valid @RequestBody AuthVerifyOtpRequest request) {
         return mobileAuthService.verifyOtp(request.mobile(), request.otp());
+    }
+
+    @PostMapping("/self-register")
+    public AuthSelfRegisterResponse selfRegister(@Valid @RequestBody AuthSelfRegisterRequest request) {
+        return mobileAuthService.selfRegister(
+            request.firstName(),
+            request.lastName(),
+            request.fullName(),
+            request.mobile(),
+            request.sex(),
+            request.age(),
+            request.ageType()
+        );
     }
 }

@@ -4,11 +4,14 @@ import com.alihsan.backend.dto.CreateAppointmentIntentRequest;
 import com.alihsan.backend.dto.CreateAppointmentIntentResponse;
 import com.alihsan.backend.dto.LabReportView;
 import com.alihsan.backend.dto.PatientAppointmentView;
+import com.alihsan.backend.dto.PractitionerSlotView;
 import com.alihsan.backend.dto.PractitionerView;
 import com.alihsan.backend.service.PaymentIntentService;
 import com.alihsan.backend.service.PrimeWorkflowService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,6 +49,14 @@ public class HealthcareController {
     @GetMapping("/practitioners")
     public List<PractitionerView> getPractitioners(@RequestParam(value = "department", required = false) String department) {
         return primeWorkflowService.getPractitioners(department);
+    }
+
+    @GetMapping("/practitioners/{practitionerId}/slots")
+    public List<PractitionerSlotView> getPractitionerSlots(
+        @PathVariable("practitionerId") @NotBlank String practitionerId,
+        @RequestParam("date") @NotBlank String date
+    ) {
+        return primeWorkflowService.getPractitionerSlots(practitionerId, date);
     }
 
     @GetMapping("/lab-reports")

@@ -90,6 +90,34 @@
       ]
     },
     {
+      "name": "Auth - Self Register",
+      "request": {
+        "method": "POST",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"New\",\n  \"lastName\": \"Patient\",\n  \"fullName\": \"New Patient\",\n  \"mobile\": \"{{mobile}}\",\n  \"sex\": \"Male\",\n  \"age\": 28,\n  \"ageType\": \"Year\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/mobile/auth/self-register",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "mobile", "auth", "self-register"]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j && j.patientId) pm.collectionVariables.set('patientId', j.patientId);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ]
+    },
+    {
       "name": "Healthcare - Practitioners",
       "request": {
         "method": "GET",
@@ -97,6 +125,18 @@
           "raw": "{{baseUrl}}/api/healthcare/practitioners",
           "host": ["{{baseUrl}}"],
           "path": ["api", "healthcare", "practitioners"]
+        }
+      }
+    },
+    {
+      "name": "Healthcare - Practitioner Slots",
+      "request": {
+        "method": "GET",
+        "url": {
+          "raw": "{{baseUrl}}/api/healthcare/practitioners/{{practitionerId}}/slots?date=2026-03-19",
+          "host": ["{{baseUrl}}"],
+          "path": ["api", "healthcare", "practitioners", "{{practitionerId}}", "slots"],
+          "query": [{ "key": "date", "value": "2026-03-19" }]
         }
       }
     },
