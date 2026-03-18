@@ -103,7 +103,9 @@ public class PaymentIntentService {
             request.lastName(),
             request.fullName(),
             request.mobile(),
-            request.sex()
+            request.sex(),
+            request.age(),
+            request.ageType()
         );
     }
 }

@@ -13,6 +13,8 @@ public record CreateAppointmentIntentRequest(
     String fullName,
     String mobile,
     String sex,
+    Integer age,
+    String ageType,
     @NotBlank String practitionerId,
     @NotBlank String appointmentDate,
     @NotBlank String appointmentTime,

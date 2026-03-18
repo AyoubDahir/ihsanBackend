@@ -45,16 +45,32 @@ public class PrimeWorkflowService {
         String lastName,
         String fullName,
         String mobile,
-        String sex
+        String sex,
+        Integer age,
+        String ageType
     ) {
         String normalizedMobile = mobile == null ? null : mobile.trim();
         if (normalizedMobile == null || normalizedMobile.isEmpty()) {
             throw new IllegalArgumentException("mobile is required when patientId is missing");
         }
+        if (age == null) {
+            throw new IllegalArgumentException("age is required when patientId is missing");
+        }
+        if (age < 0) {
+            throw new IllegalArgumentException("age cannot be negative");
+        }
 
         String normalizedSex = sex == null ? "Male" : sex.trim();
         if (normalizedSex.isEmpty()) {
             normalizedSex = "Male";
+        }
+        String normalizedAgeType = ageType == null ? "" : ageType.trim();
+        if (normalizedAgeType.isEmpty()) {
+            throw new IllegalArgumentException("ageType is required when patientId is missing");
+        }
+        normalizedAgeType = normalizedAgeType.substring(0, 1).toUpperCase() + normalizedAgeType.substring(1).toLowerCase();
+        if (!normalizedAgeType.equals("Year") && !normalizedAgeType.equals("Month") && !normalizedAgeType.equals("Day")) {
+            throw new IllegalArgumentException("ageType must be one of: Year, Month, Day");
         }
 
         String normalizedFullName = fullName == null ? "" : fullName.trim();
@@ -80,7 +96,9 @@ public class PrimeWorkflowService {
                 "first_name", normalizedFirstName,
                 "last_name", normalizedLastName,
                 "mobile", normalizedMobile,
-                "sex", normalizedSex
+                "sex", normalizedSex,
+                "p_age", age,
+                "age_type", normalizedAgeType
             )
         );
 
