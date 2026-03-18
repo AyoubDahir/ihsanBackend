@@ -30,10 +30,11 @@ public class PaymentIntentService {
     @Transactional
     public PaymentIntent createIntent(CreateAppointmentIntentRequest request) {
         String referenceId = "APPT-" + UUID.randomUUID();
+        String patientId = resolvePatientId(request);
 
         PaymentIntent intent = new PaymentIntent();
         intent.setReferenceId(referenceId);
-        intent.setPatientId(request.patientId());
+        intent.setPatientId(patientId);
         intent.setPractitionerId(request.practitionerId());
         intent.setAppointmentDate(request.appointmentDate());
         intent.setAppointmentTime(request.appointmentTime());
@@ -90,5 +91,19 @@ public class PaymentIntentService {
 
     private String asString(Object val) {
         return val == null ? null : String.valueOf(val);
+    }
+
+    private String resolvePatientId(CreateAppointmentIntentRequest request) {
+        String patientId = request.patientId();
+        if (patientId != null && !patientId.trim().isEmpty()) {
+            return patientId.trim();
+        }
+        return primeWorkflowService.registerPatientFromMobile(
+            request.firstName(),
+            request.lastName(),
+            request.fullName(),
+            request.mobile(),
+            request.sex()
+        );
     }
 }

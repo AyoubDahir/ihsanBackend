@@ -40,6 +40,58 @@ public class PrimeWorkflowService {
     }
 
     @SuppressWarnings("unchecked")
+    public String registerPatientFromMobile(
+        String firstName,
+        String lastName,
+        String fullName,
+        String mobile,
+        String sex
+    ) {
+        String normalizedMobile = mobile == null ? null : mobile.trim();
+        if (normalizedMobile == null || normalizedMobile.isEmpty()) {
+            throw new IllegalArgumentException("mobile is required when patientId is missing");
+        }
+
+        String normalizedSex = sex == null ? "Male" : sex.trim();
+        if (normalizedSex.isEmpty()) {
+            normalizedSex = "Male";
+        }
+
+        String normalizedFullName = fullName == null ? "" : fullName.trim();
+        String normalizedFirstName = firstName == null ? "" : firstName.trim();
+        String normalizedLastName = lastName == null ? "" : lastName.trim();
+
+        if (normalizedFirstName.isEmpty() && normalizedLastName.isEmpty() && !normalizedFullName.isEmpty()) {
+            String[] parts = normalizedFullName.split("\\s+", 2);
+            normalizedFirstName = parts[0];
+            normalizedLastName = parts.length > 1 ? parts[1] : "Unknown";
+        }
+
+        if (normalizedFirstName.isEmpty()) {
+            throw new IllegalArgumentException("firstName or fullName is required when patientId is missing");
+        }
+        if (normalizedLastName.isEmpty()) {
+            normalizedLastName = "Unknown";
+        }
+
+        Map<String, Object> response = frappeClient.postMethod(
+            "prime.mobile_api.register_patient_from_mobile",
+            Map.of(
+                "first_name", normalizedFirstName,
+                "last_name", normalizedLastName,
+                "mobile", normalizedMobile,
+                "sex", normalizedSex
+            )
+        );
+
+        Map<String, Object> message = (Map<String, Object>) response.get("message");
+        if (message == null || message.get("patient") == null) {
+            throw new IllegalStateException("Prime registration response did not include patient id");
+        }
+        return String.valueOf(message.get("patient"));
+    }
+
+    @SuppressWarnings("unchecked")
     public List<PatientAppointmentView> getAppointments(String patientId) {
         Map<String, Object> response = frappeClient.getResource(
             "Patient Appointment",

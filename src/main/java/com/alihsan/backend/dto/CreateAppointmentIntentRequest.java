@@ -7,7 +7,12 @@ import jakarta.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 public record CreateAppointmentIntentRequest(
-    @NotBlank String patientId,
+    String patientId,
+    String firstName,
+    String lastName,
+    String fullName,
+    String mobile,
+    String sex,
     @NotBlank String practitionerId,
     @NotBlank String appointmentDate,
     @NotBlank String appointmentTime,
