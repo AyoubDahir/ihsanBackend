@@ -18,13 +18,17 @@ public class FrappeClient {
         String token = "token " + primeProperties.apiKey() + ":" + primeProperties.apiSecret();
         
         HttpClient httpClient = HttpClient.create()
-            .headers(headers -> headers.add("Expect", ""));
+            .headers(headers -> {
+                headers.remove("Expect");
+                headers.set("Expect", "");
+            });
         
         this.webClient = WebClient.builder()
             .clientConnector(new ReactorClientHttpConnector(httpClient))
             .baseUrl(primeProperties.baseUrl())
             .defaultHeader(HttpHeaders.AUTHORIZATION, token)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .defaultHeader("Expect", "")
             .build();
     }
 
@@ -32,7 +36,10 @@ public class FrappeClient {
     public Map<String, Object> postMethod(String methodPath, Map<String, Object> payload) {
         return webClient.post()
             .uri("/api/method/" + methodPath)
-            .header("Expect", "")
+            .headers(headers -> {
+                headers.remove("Expect");
+                headers.set("Expect", "");
+            })
             .bodyValue(payload)
             .retrieve()
             .bodyToMono(Map.class)
