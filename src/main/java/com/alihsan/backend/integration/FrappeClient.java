@@ -1,54 +1,76 @@
 package com.alihsan.backend.integration;
 
 import com.alihsan.backend.config.PrimeProperties;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class FrappeClient {
-    private final RestTemplate restTemplate;
+    private final HttpClient httpClient;
+    private final ObjectMapper objectMapper;
     private final String baseUrl;
     private final String token;
     private final String host;
 
     public FrappeClient(PrimeProperties primeProperties) {
-        this.restTemplate = new RestTemplate();
+        this.httpClient = HttpClient.newBuilder()
+            .version(HttpClient.Version.HTTP_1_1)
+            .build();
+        this.objectMapper = new ObjectMapper();
         this.baseUrl = primeProperties.baseUrl();
         this.token = "token " + primeProperties.apiKey() + ":" + primeProperties.apiSecret();
         this.host = primeProperties.host() != null ? primeProperties.host() : "alihsans.com";
     }
 
-    private HttpHeaders createHeaders() {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.set(HttpHeaders.AUTHORIZATION, token);
-        headers.set(HttpHeaders.HOST, host);
-        return headers;
-    }
-
     @SuppressWarnings("unchecked")
     public Map<String, Object> postMethod(String methodPath, Map<String, Object> payload) {
-        String url = baseUrl + "/api/method/" + methodPath;
-        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(payload, createHeaders());
-        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
-        return response.getBody();
+        try {
+            String url = baseUrl + "/api/method/" + methodPath;
+            String jsonBody = objectMapper.writeValueAsString(payload);
+            
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .header("Authorization", token)
+                .header("Host", host)
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .build();
+            
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return objectMapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to call Prime API: " + e.getMessage(), e);
+        }
     }
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> getResource(String resourcePath, Map<String, Object> queryParams) {
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + "/api/resource/" + resourcePath);
-        queryParams.forEach((k, v) -> builder.queryParam(k, v));
-        
-        HttpEntity<Void> entity = new HttpEntity<>(createHeaders());
-        ResponseEntity<Map> response = restTemplate.exchange(builder.toUriString(), HttpMethod.GET, entity, Map.class);
-        return response.getBody();
+        try {
+            String queryString = queryParams.entrySet().stream()
+                .map(e -> e.getKey() + "=" + e.getValue())
+                .collect(Collectors.joining("&"));
+            String url = baseUrl + "/api/resource/" + resourcePath + (queryString.isEmpty() ? "" : "?" + queryString);
+            
+            HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(url))
+                .header("Content-Type", "application/json")
+                .header("Authorization", token)
+                .header("Host", host)
+                .GET()
+                .build();
+            
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+            return objectMapper.readValue(response.body(), new TypeReference<Map<String, Object>>() {});
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to call Prime API: " + e.getMessage(), e);
+        }
     }
 }
