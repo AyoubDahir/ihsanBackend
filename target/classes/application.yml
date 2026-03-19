@@ -1,0 +1,46 @@
+server:
+  port: ${PORT:5000}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/alihsan_mobile}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:root}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+prime:
+  base-url: ${PRIME_BASE_URL:http://localhost:8000}
+  api-key: ${PRIME_API_KEY:change_me}
+  api-secret: ${PRIME_API_SECRET:change_me}
+
+waafi:
+  url: ${WAAFI_URL:https://api.waafipay.net/asm}
+  merchant-uid: ${WAAFI_MERCHANT_UID:}
+  api-user-id: ${WAAFI_API_USER_ID:}
+  api-key: ${WAAFI_API_KEY:}
+  channel-name: ${WAAFI_CHANNEL_NAME:WEB}
+
+auth:
+  otp:
+    ttl-seconds: ${AUTH_OTP_TTL_SECONDS:300}
+    max-attempts: ${AUTH_OTP_MAX_ATTEMPTS:5}
+    return-in-response: ${AUTH_OTP_RETURN_IN_RESPONSE:false}
+
+hormuud:
+  sms:
+    token-url: ${HORMUUD_SMS_TOKEN_URL:https://smsapi.hormuud.com/token}
+    send-url: ${HORMUUD_SMS_SEND_URL:https://smsapi.hormuud.com/api/SendSMS}
+    username: ${HORMUUD_SMS_USERNAME:}
+    password: ${HORMUUD_SMS_PASSWORD:}
+    sender-id: ${HORMUUD_SMS_SENDER_ID:}
+
+logging:
+  level:
+    org.springframework.web: INFO
+    com.alihsan.backend: INFO

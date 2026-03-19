@@ -1,290 +1,366 @@
 {
   "info": {
-    "_postman_id": "8c95ef89-83c9-4d1f-9e10-cf53a596aa10",
+    "_postman_id": "08d1e0f0-fac2-4f18-a96a-8bb7a5bb2e7d",
     "name": "Alihsan Backend - All Endpoints",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "baseUrl", "value": "https://api.alihsans.com" },
-    { "key": "mobile", "value": "252614440378" },
-    { "key": "otp", "value": "" },
-    { "key": "patientId", "value": "PID-00001" },
-    { "key": "practitionerId", "value": "DOC-0001" },
-    { "key": "invoiceId", "value": "SINV-0001" },
-    { "key": "referenceId", "value": "" },
-    { "key": "invoiceReferenceId", "value": "" }
+    {
+      "key": "baseUrl",
+      "value": "https://api.alihsans.com"
+    },
+    {
+      "key": "mobile",
+      "value": "252614440378"
+    },
+    {
+      "key": "otp",
+      "value": ""
+    },
+    {
+      "key": "patientId",
+      "value": "PID-00001"
+    },
+    {
+      "key": "practitionerId",
+      "value": "HLC-PRAC-2026-00001"
+    },
+    {
+      "key": "appointmentDate",
+      "value": "2026-03-20"
+    },
+    {
+      "key": "appointmentTime",
+      "value": "10:00:00"
+    },
+    {
+      "key": "department",
+      "value": "General Medicine"
+    },
+    {
+      "key": "appointmentReferenceId",
+      "value": ""
+    },
+    {
+      "key": "invoiceId",
+      "value": ""
+    },
+    {
+      "key": "invoiceReferenceId",
+      "value": ""
+    },
+    {
+      "key": "providerTxnId",
+      "value": "WAAFI-TXN-001"
+    }
   ],
   "item": [
     {
       "name": "Health",
       "request": {
         "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/health",
-          "host": ["{{baseUrl}}"],
-          "path": ["health"]
+        "header": [],
+        "url": "{{baseUrl}}/health"
+      }
+    },
+    {
+      "name": "Auth Check Mobile",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/mobile/auth/check-mobile",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mobile\": \"{{mobile}}\"\n}"
         }
       }
     },
     {
-      "name": "Auth - Check Mobile",
+      "name": "Auth Self Register",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"{{mobile}}\"\n}" },
-        "url": {
-          "raw": "{{baseUrl}}/api/mobile/auth/check-mobile",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "mobile", "auth", "check-mobile"]
-        }
-      }
-    },
-    {
-      "name": "Auth - Send OTP",
-      "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"{{mobile}}\"\n}" },
-        "url": {
-          "raw": "{{baseUrl}}/api/mobile/auth/send-otp",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "mobile", "auth", "send-otp"]
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/mobile/auth/self-register",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"firstName\": \"Jaabir\",\n  \"lastName\": \"Dahir\",\n  \"fullName\": \"Jaabir Dahir\",\n  \"mobile\": \"{{mobile}}\",\n  \"sex\": \"Male\",\n  \"age\": 28,\n  \"ageType\": \"Year\"\n}"
         }
       },
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j && j.patientId) pm.collectionVariables.set('patientId', j.patientId);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Auth Send OTP",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/mobile/auth/send-otp",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mobile\": \"{{mobile}}\"\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
             "exec": [
               "const j = pm.response.json();",
               "if (j && j.otp) pm.collectionVariables.set('otp', j.otp);"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ]
     },
     {
-      "name": "Auth - Verify OTP",
+      "name": "Auth Verify OTP",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": { "mode": "raw", "raw": "{\n  \"mobile\": \"{{mobile}}\",\n  \"otp\": \"{{otp}}\"\n}" },
-        "url": {
-          "raw": "{{baseUrl}}/api/mobile/auth/verify-otp",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "mobile", "auth", "verify-otp"]
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/mobile/auth/verify-otp",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"mobile\": \"{{mobile}}\",\n  \"otp\": \"{{otp}}\"\n}"
         }
       },
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
               "const j = pm.response.json();",
               "if (j && j.patientId) pm.collectionVariables.set('patientId', j.patientId);"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ]
     },
     {
-      "name": "Auth - Self Register",
+      "name": "Healthcare Practitioners",
       "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"firstName\": \"New\",\n  \"lastName\": \"Patient\",\n  \"fullName\": \"New Patient\",\n  \"mobile\": \"{{mobile}}\",\n  \"sex\": \"Male\",\n  \"age\": 28,\n  \"ageType\": \"Year\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/mobile/auth/self-register",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "mobile", "auth", "self-register"]
-        }
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/healthcare/practitioners"
       },
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
               "const j = pm.response.json();",
-              "if (j && j.patientId) pm.collectionVariables.set('patientId', j.patientId);"
-            ],
-            "type": "text/javascript"
+              "if (Array.isArray(j) && j.length && j[0].id) pm.collectionVariables.set('practitionerId', j[0].id);"
+            ]
           }
         }
       ]
     },
     {
-      "name": "Healthcare - Practitioners",
+      "name": "Healthcare Practitioners By Department",
       "request": {
         "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/healthcare/practitioners",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "healthcare", "practitioners"]
-        }
+        "header": [],
+        "url": "{{baseUrl}}/api/healthcare/practitioners?department={{department}}"
       }
     },
     {
-      "name": "Healthcare - Practitioner Slots",
+      "name": "Healthcare Practitioner Slots",
       "request": {
         "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/healthcare/practitioners/{{practitionerId}}/slots?date=2026-03-19",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "healthcare", "practitioners", "{{practitionerId}}", "slots"],
-          "query": [{ "key": "date", "value": "2026-03-19" }]
-        }
+        "header": [],
+        "url": "{{baseUrl}}/api/healthcare/practitioners/{{practitionerId}}/slots?date={{appointmentDate}}"
       }
     },
     {
-      "name": "Healthcare - Create Appointment (Existing)",
+      "name": "Healthcare Create Appointment Intent",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/healthcare/appointments",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"practitionerId\": \"{{practitionerId}}\",\n  \"appointmentDate\": \"2026-03-19\",\n  \"appointmentTime\": \"10:00:00\",\n  \"department\": \"General Medicine\",\n  \"amount\": 5.00,\n  \"phoneNumber\": \"{{mobile}}\",\n  \"paymentType\": \"EVC\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/healthcare/appointments",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "healthcare", "appointments"]
+          "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"firstName\": \"Jaabir\",\n  \"lastName\": \"Dahir\",\n  \"fullName\": \"Jaabir Dahir\",\n  \"mobile\": \"{{mobile}}\",\n  \"sex\": \"Male\",\n  \"age\": 28,\n  \"ageType\": \"Year\",\n  \"practitionerId\": \"{{practitionerId}}\",\n  \"appointmentDate\": \"{{appointmentDate}}\",\n  \"appointmentTime\": \"{{appointmentTime}}\",\n  \"department\": \"{{department}}\",\n  \"amount\": 1.1,\n  \"phoneNumber\": \"{{mobile}}\",\n  \"paymentType\": \"EVC\"\n}"
         }
       },
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
               "const j = pm.response.json();",
-              "if (j && j.referenceId) pm.collectionVariables.set('referenceId', j.referenceId);"
-            ],
-            "type": "text/javascript"
+              "if (j && j.referenceId) pm.collectionVariables.set('appointmentReferenceId', j.referenceId);"
+            ]
           }
         }
       ]
     },
     {
-      "name": "Payment - Webhook Approve Appointment",
+      "name": "Healthcare Patient Appointments",
       "request": {
-        "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"referenceId\": \"{{referenceId}}\",\n  \"status\": \"APPROVED\",\n  \"providerTxnId\": \"WAAFI-TXN-APPT-001\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/payment/webhook",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "payment", "webhook"]
-        }
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/healthcare/appointments?patientId={{patientId}}"
       }
     },
     {
-      "name": "Healthcare - Appointments",
+      "name": "Healthcare Lab Reports",
       "request": {
         "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/healthcare/appointments?patientId={{patientId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "healthcare", "appointments"],
-          "query": [{ "key": "patientId", "value": "{{patientId}}" }]
-        }
+        "header": [],
+        "url": "{{baseUrl}}/api/healthcare/lab-reports?patientId={{patientId}}"
       }
     },
     {
-      "name": "Healthcare - Lab Reports",
+      "name": "Billing List Unpaid Invoices",
       "request": {
         "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/healthcare/lab-reports?patientId={{patientId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "healthcare", "lab-reports"],
-          "query": [{ "key": "patientId", "value": "{{patientId}}" }]
-        }
-      }
-    },
-    {
-      "name": "Billing - List Invoices",
-      "request": {
-        "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/billing/invoices?patientId={{patientId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "billing", "invoices"],
-          "query": [{ "key": "patientId", "value": "{{patientId}}" }]
-        }
+        "header": [],
+        "url": "{{baseUrl}}/api/billing/invoices?patientId={{patientId}}"
       },
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
               "const j = pm.response.json();",
               "if (Array.isArray(j) && j.length && j[0].invoiceId) pm.collectionVariables.set('invoiceId', j[0].invoiceId);"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ]
     },
     {
-      "name": "Billing - Pay Invoice",
+      "name": "Billing Get Unpaid Invoice",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/billing/invoices/{{invoiceId}}?patientId={{patientId}}"
+      }
+    },
+    {
+      "name": "Billing Create Invoice Payment Intent",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/billing/pay",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"invoiceId\": \"{{invoiceId}}\",\n  \"amount\": 5.00,\n  \"phoneNumber\": \"{{mobile}}\",\n  \"paymentType\": \"EVC\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/billing/pay",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "billing", "pay"]
+          "raw": "{\n  \"patientId\": \"{{patientId}}\",\n  \"invoiceId\": \"{{invoiceId}}\",\n  \"amount\": 1.1,\n  \"phoneNumber\": \"{{mobile}}\",\n  \"paymentType\": \"EVC\"\n}"
         }
       },
       "event": [
         {
           "listen": "test",
           "script": {
+            "type": "text/javascript",
             "exec": [
               "const j = pm.response.json();",
               "if (j && j.referenceId) pm.collectionVariables.set('invoiceReferenceId', j.referenceId);"
-            ],
-            "type": "text/javascript"
+            ]
           }
         }
       ]
     },
     {
-      "name": "Payment - Webhook Approve Invoice",
+      "name": "Billing Invoice Payment Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/billing/payments/{{invoiceReferenceId}}"
+      }
+    },
+    {
+      "name": "Payment Webhook Approve Appointment",
       "request": {
         "method": "POST",
-        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payment/webhook",
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"referenceId\": \"{{invoiceReferenceId}}\",\n  \"status\": \"APPROVED\",\n  \"providerTxnId\": \"WAAFI-TXN-INV-001\"\n}"
-        },
-        "url": {
-          "raw": "{{baseUrl}}/api/payment/webhook",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "payment", "webhook"]
+          "raw": "{\n  \"referenceId\": \"{{appointmentReferenceId}}\",\n  \"status\": \"APPROVED\",\n  \"providerTxnId\": \"{{providerTxnId}}\"\n}"
         }
       }
     },
     {
-      "name": "Billing - Invoice Payment Status",
+      "name": "Payment Webhook Approve Invoice",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/api/payment/webhook",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"referenceId\": \"{{invoiceReferenceId}}\",\n  \"status\": \"APPROVED\",\n  \"providerTxnId\": \"{{providerTxnId}}\"\n}"
+        }
+      }
+    },
+    {
+      "name": "Payment Verify Appointment Reference",
       "request": {
         "method": "GET",
-        "url": {
-          "raw": "{{baseUrl}}/api/billing/payments/{{invoiceReferenceId}}",
-          "host": ["{{baseUrl}}"],
-          "path": ["api", "billing", "payments", "{{invoiceReferenceId}}"]
-        }
+        "header": [],
+        "url": "{{baseUrl}}/api/payment/verify/{{appointmentReferenceId}}"
+      }
+    },
+    {
+      "name": "Payment Verify Invoice Reference",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/payment/verify/{{invoiceReferenceId}}"
       }
     }
   ]

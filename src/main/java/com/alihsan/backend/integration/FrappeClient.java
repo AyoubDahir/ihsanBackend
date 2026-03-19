@@ -3,8 +3,10 @@ package com.alihsan.backend.integration;
 import com.alihsan.backend.config.PrimeProperties;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.netty.http.client.HttpClient;
 
 import java.util.Map;
 
@@ -14,7 +16,12 @@ public class FrappeClient {
 
     public FrappeClient(PrimeProperties primeProperties) {
         String token = "token " + primeProperties.apiKey() + ":" + primeProperties.apiSecret();
+        
+        HttpClient httpClient = HttpClient.create()
+            .headers(headers -> headers.add("Expect", ""));
+        
         this.webClient = WebClient.builder()
+            .clientConnector(new ReactorClientHttpConnector(httpClient))
             .baseUrl(primeProperties.baseUrl())
             .defaultHeader(HttpHeaders.AUTHORIZATION, token)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
