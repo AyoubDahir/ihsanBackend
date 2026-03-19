@@ -6,5 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 public record PrimeProperties(
     String baseUrl,
     String apiKey,
-    String apiSecret
+    String apiSecret,
+    String host
 ) {}

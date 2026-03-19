@@ -16,6 +16,7 @@ public class FrappeClient {
 
     public FrappeClient(PrimeProperties primeProperties) {
         String token = "token " + primeProperties.apiKey() + ":" + primeProperties.apiSecret();
+        String host = primeProperties.host() != null ? primeProperties.host() : "alihsans.com";
         
         HttpClient httpClient = HttpClient.create()
             .headers(headers -> {
@@ -28,6 +29,7 @@ public class FrappeClient {
             .baseUrl(primeProperties.baseUrl())
             .defaultHeader(HttpHeaders.AUTHORIZATION, token)
             .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
+            .defaultHeader(HttpHeaders.HOST, host)
             .defaultHeader("Expect", "")
             .build();
     }
