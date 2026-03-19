@@ -32,6 +32,7 @@ public class FrappeClient {
     public Map<String, Object> postMethod(String methodPath, Map<String, Object> payload) {
         return webClient.post()
             .uri("/api/method/" + methodPath)
+            .header("Expect", "")
             .bodyValue(payload)
             .retrieve()
             .bodyToMono(Map.class)
