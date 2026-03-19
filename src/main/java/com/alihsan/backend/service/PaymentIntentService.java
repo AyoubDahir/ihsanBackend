@@ -73,10 +73,24 @@ public class PaymentIntentService {
                 intent.getReferenceId()
             );
 
+            // Check for error response from Prime API
+            if (result.containsKey("exc_type") || result.containsKey("exception")) {
+                String errorMsg = asString(result.get("exception"));
+                throw new RuntimeException("Prime API error: " + errorMsg);
+            }
+
+            // Extract que and invoice from the message wrapper
             @SuppressWarnings("unchecked")
             Map<String, Object> message = (Map<String, Object>) result.getOrDefault("message", Map.of());
-            intent.setPrimeQue(asString(message.get("que")));
-            intent.setPrimeInvoice(asString(message.get("invoice")));
+            String que = asString(message.get("que"));
+            String invoice = asString(message.get("invoice"));
+            
+            if (que == null || que.isEmpty()) {
+                throw new RuntimeException("Prime API did not return a queue ID");
+            }
+            
+            intent.setPrimeQue(que);
+            intent.setPrimeInvoice(invoice);
             intent.setStatus(PaymentIntentStatus.APPOINTMENT_CREATED);
         } else {
             intent.setStatus(PaymentIntentStatus.FAILED);
