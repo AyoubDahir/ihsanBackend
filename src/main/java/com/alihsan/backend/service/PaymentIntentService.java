@@ -74,9 +74,7 @@ public class PaymentIntentService {
             intent.getAppointmentDate(),
             intent.getAppointmentTime(),
             intent.getDepartment(),
-            intent.getReferenceId(),
-            intent.getAmount(),
-            "Waafi"
+            intent.getReferenceId()
         );
 
         if (result.containsKey("exc_type") || result.containsKey("exception")) {
@@ -116,9 +114,7 @@ public class PaymentIntentService {
                 intent.getAppointmentDate(),
                 intent.getAppointmentTime(),
                 intent.getDepartment(),
-                intent.getReferenceId(),
-                intent.getAmount(),
-                "Waafi"
+                intent.getReferenceId()
             );
 
             // Check for error response from Prime API
