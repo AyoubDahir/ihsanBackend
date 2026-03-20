@@ -58,6 +58,9 @@ public class PaymentIntent {
     @Column(name = "practitioner_name", length = 200)
     private String practitionerName;
 
+    @Column(name = "prime_payment_entry", length = 140)
+    private String primePaymentEntry;
+
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
@@ -174,5 +177,13 @@ public class PaymentIntent {
 
     public void setPractitionerName(String practitionerName) {
         this.practitionerName = practitionerName;
+    }
+
+    public String getPrimePaymentEntry() {
+        return primePaymentEntry;
+    }
+
+    public void setPrimePaymentEntry(String primePaymentEntry) {
+        this.primePaymentEntry = primePaymentEntry;
     }
 }

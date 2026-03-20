@@ -44,6 +44,7 @@ public class PaymentController {
             out.put("primeInvoice", intent.getPrimeInvoice());
             out.put("patientName", intent.getPatientName());
             out.put("practitionerName", intent.getPractitionerName());
+            out.put("primePaymentEntry", intent.getPrimePaymentEntry());
             return out;
         }
         if (invoicePaymentIntentService.findByReference(request.referenceId()).isPresent()) {
