@@ -5,6 +5,8 @@ import com.alihsan.backend.domain.PaymentIntentStatus;
 import com.alihsan.backend.dto.CreateAppointmentIntentRequest;
 import com.alihsan.backend.repository.PaymentIntentRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -13,6 +15,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentIntentService {
+    private static final Logger log = LoggerFactory.getLogger(PaymentIntentService.class);
     private final PaymentIntentRepository paymentIntentRepository;
     private final PaymentProviderService paymentProviderService;
     private final PrimeWorkflowService primeWorkflowService;
@@ -50,7 +53,48 @@ public class PaymentIntentService {
             paymentIntentRepository.save(intent);
             throw ex;
         }
-        return intent;
+
+        // Waafi is synchronous — reaching here means payment is APPROVED.
+        // Immediately create the Queue, Invoice and Payment Entry in Frappe.
+        intent.setStatus(PaymentIntentStatus.APPROVED);
+        paymentIntentRepository.save(intent);
+        try {
+            processFrappeAfterApproval(intent);
+        } catch (Exception ex) {
+            // Frappe failed but payment was taken — log for reconciliation to retry.
+            log.error("Frappe processing failed after Waafi approval for {}: {}", referenceId, ex.getMessage());
+        }
+        return paymentIntentRepository.save(intent);
+    }
+
+    private void processFrappeAfterApproval(PaymentIntent intent) {
+        Map<String, Object> result = primeWorkflowService.createQueFromMobile(
+            intent.getPatientId(),
+            intent.getPractitionerId(),
+            intent.getAppointmentDate(),
+            intent.getAppointmentTime(),
+            intent.getDepartment(),
+            intent.getReferenceId()
+        );
+
+        if (result.containsKey("exc_type") || result.containsKey("exception")) {
+            throw new RuntimeException("Prime API error: " + asString(result.get("exception")));
+        }
+
+        @SuppressWarnings("unchecked")
+        Map<String, Object> message = (Map<String, Object>) result.getOrDefault("message", Map.of());
+        String que = asString(message.get("que"));
+        if (que == null || que.isEmpty()) {
+            throw new RuntimeException("Prime API did not return a queue ID");
+        }
+
+        intent.setPrimeQue(que);
+        intent.setPrimeInvoice(asString(message.get("invoice")));
+        intent.setPatientName(asString(message.get("patient_name")));
+        intent.setPractitionerName(asString(message.get("practitioner_name")));
+        intent.setPrimePaymentEntry(asString(message.get("payment_entry")));
+        intent.setStatus(PaymentIntentStatus.APPOINTMENT_CREATED);
+        log.info("Appointment created in Frappe for {}: que={}", intent.getReferenceId(), que);
     }
 
     @Transactional

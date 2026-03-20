@@ -6,6 +6,8 @@ import com.alihsan.backend.dto.BillingInvoiceView;
 import com.alihsan.backend.dto.CreateInvoicePaymentRequest;
 import com.alihsan.backend.repository.InvoicePaymentIntentRepository;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -15,6 +17,7 @@ import java.util.UUID;
 
 @Service
 public class InvoicePaymentIntentService {
+    private static final Logger log = LoggerFactory.getLogger(InvoicePaymentIntentService.class);
     private final InvoicePaymentIntentRepository invoicePaymentIntentRepository;
     private final PaymentProviderService paymentProviderService;
     private final PrimeWorkflowService primeWorkflowService;
@@ -63,7 +66,28 @@ public class InvoicePaymentIntentService {
             invoicePaymentIntentRepository.save(intent);
             throw ex;
         }
-        return intent;
+
+        // Waafi is synchronous — reaching here means payment is APPROVED.
+        // Immediately mark the invoice as paid in Frappe.
+        intent.setStatus(InvoicePaymentIntentStatus.APPROVED);
+        invoicePaymentIntentRepository.save(intent);
+        try {
+            Map<String, Object> response = primeWorkflowService.markSalesInvoicePaidFromMobile(
+                intent.getInvoiceId(),
+                intent.getAmount().toPlainString(),
+                intent.getPaymentType(),
+                intent.getReferenceId(),
+                null
+            );
+            @SuppressWarnings("unchecked")
+            Map<String, Object> message = (Map<String, Object>) response.getOrDefault("message", Map.of());
+            intent.setPrimePaymentEntry(asString(message.get("payment_entry")));
+            intent.setStatus(InvoicePaymentIntentStatus.PAID);
+            log.info("Invoice {} paid in Frappe for {}", intent.getInvoiceId(), referenceId);
+        } catch (Exception ex) {
+            log.error("Frappe invoice payment failed after Waafi approval for {}: {}", referenceId, ex.getMessage());
+        }
+        return invoicePaymentIntentRepository.save(intent);
     }
 
     @Transactional

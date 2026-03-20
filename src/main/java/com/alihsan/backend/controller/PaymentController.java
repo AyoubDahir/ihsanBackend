@@ -68,4 +68,29 @@ public class PaymentController {
     public Map<String, Object> verifyPayment(@PathVariable String referenceId) {
         return paymentProviderService.checkTransactionStatus(referenceId);
     }
+
+    /**
+     * Returns the booking pass details for a confirmed appointment.
+     * The mobile app shows a QR code encoding the referenceId; the hospital
+     * cashier scans it here to instantly look up the patient's queue position.
+     */
+    @GetMapping("/pass/{referenceId}")
+    public Map<String, Object> getBookingPass(@PathVariable String referenceId) {
+        var intent = paymentIntentService.findByReference(referenceId)
+            .orElseThrow(() -> new IllegalArgumentException("Booking not found: " + referenceId));
+
+        Map<String, Object> out = new HashMap<>();
+        out.put("referenceId", intent.getReferenceId());
+        out.put("status", intent.getStatus().name());
+        out.put("patientName", intent.getPatientName());
+        out.put("practitionerName", intent.getPractitionerName());
+        out.put("appointmentDate", intent.getAppointmentDate());
+        out.put("appointmentTime", intent.getAppointmentTime());
+        out.put("department", intent.getDepartment());
+        out.put("amount", intent.getAmount());
+        out.put("primeQue", intent.getPrimeQue());
+        out.put("primeInvoice", intent.getPrimeInvoice());
+        out.put("confirmed", "APPOINTMENT_CREATED".equals(intent.getStatus().name()));
+        return out;
+    }
 }
