@@ -177,7 +177,7 @@ public class PrimeWorkflowService {
             Map.of(
                 "practitioner", practitionerId,
                 "date", date,
-                "appointment", "null"
+                "appointment", "{\"doctype\":\"Patient Appointment\",\"__islocal\":1,\"patient\":\"\",\"invoiced\":0}"
             )
         );
         Map<String, Object> message = (Map<String, Object>) response.getOrDefault("message", Map.of());
