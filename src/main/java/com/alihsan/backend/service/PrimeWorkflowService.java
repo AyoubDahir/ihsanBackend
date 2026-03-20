@@ -176,7 +176,8 @@ public class PrimeWorkflowService {
             "healthcare.healthcare.doctype.patient_appointment.patient_appointment.get_availability_data",
             Map.of(
                 "practitioner", practitionerId,
-                "date", date
+                "date", date,
+                "appointment", ""
             )
         );
         Map<String, Object> message = (Map<String, Object>) response.getOrDefault("message", Map.of());
