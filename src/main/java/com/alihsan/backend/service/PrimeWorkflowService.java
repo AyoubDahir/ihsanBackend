@@ -9,6 +9,7 @@ import com.alihsan.backend.integration.FrappeClient;
 import com.alihsan.backend.util.MobileNumberUtil;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -43,10 +44,10 @@ public class PrimeWorkflowService {
         String appointmentTime,
         String department,
         String referenceId,
-        java.math.BigDecimal paidAmount,
+        BigDecimal paidAmount,
         String modeOfPayment
     ) {
-        Map<String, Object> params = new java.util.HashMap<>();
+        Map<String, Object> params = new HashMap<>();
         params.put("patient", patientId);
         params.put("practitioner", practitionerId);
         params.put("appointment_date", appointmentDate);
