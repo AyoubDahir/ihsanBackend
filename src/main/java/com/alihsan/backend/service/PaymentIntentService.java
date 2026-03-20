@@ -91,6 +91,8 @@ public class PaymentIntentService {
             
             intent.setPrimeQue(que);
             intent.setPrimeInvoice(invoice);
+            intent.setPatientName(asString(message.get("patient_name")));
+            intent.setPractitionerName(asString(message.get("practitioner_name")));
             intent.setStatus(PaymentIntentStatus.APPOINTMENT_CREATED);
         } else {
             intent.setStatus(PaymentIntentStatus.FAILED);
