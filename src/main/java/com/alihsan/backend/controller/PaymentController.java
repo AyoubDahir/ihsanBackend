@@ -66,6 +66,43 @@ public class PaymentController {
 
     @GetMapping("/verify/{referenceId}")
     public Map<String, Object> verifyPayment(@PathVariable String referenceId) {
+        // Check appointment intent DB first — Waafi's HPP_GETTRANINFO uses a different
+        // reference scheme, so calling it with our APPT-* key always returns "not found".
+        var apptIntent = paymentIntentService.findByReference(referenceId);
+        if (apptIntent.isPresent()) {
+            var intent = apptIntent.get();
+            String statusName = intent.getStatus().name();
+            boolean confirmed = "APPOINTMENT_CREATED".equals(statusName);
+            boolean failed    = "FAILED".equals(statusName);
+            Map<String, Object> out = new HashMap<>();
+            out.put("success", confirmed);
+            out.put("status",  statusName);
+            out.put("referenceId", intent.getReferenceId());
+            out.put("type", "APPOINTMENT");
+            out.put("primeQue", intent.getPrimeQue());
+            out.put("primeInvoice", intent.getPrimeInvoice());
+            out.put("patientName", intent.getPatientName());
+            out.put("practitionerName", intent.getPractitionerName());
+            out.put("primePaymentEntry", intent.getPrimePaymentEntry());
+            return out;
+        }
+
+        // Check invoice intent DB
+        var invoiceIntent = invoicePaymentIntentService.findByReference(referenceId);
+        if (invoiceIntent.isPresent()) {
+            var intent = invoiceIntent.get();
+            String statusName = intent.getStatus().name();
+            Map<String, Object> out = new HashMap<>();
+            out.put("success", "PAID".equals(statusName));
+            out.put("status",  statusName);
+            out.put("referenceId", intent.getReferenceId());
+            out.put("type", "INVOICE");
+            out.put("invoiceId", intent.getInvoiceId());
+            out.put("paymentEntry", intent.getPrimePaymentEntry());
+            return out;
+        }
+
+        // Unknown reference — fall back to Waafi direct check
         return paymentProviderService.checkTransactionStatus(referenceId);
     }
 
