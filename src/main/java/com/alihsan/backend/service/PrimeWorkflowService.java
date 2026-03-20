@@ -177,7 +177,7 @@ public class PrimeWorkflowService {
             Map.of(
                 "practitioner", practitionerId,
                 "date", date,
-                "appointment", ""
+                "appointment", "null"
             )
         );
         Map<String, Object> message = (Map<String, Object>) response.getOrDefault("message", Map.of());
