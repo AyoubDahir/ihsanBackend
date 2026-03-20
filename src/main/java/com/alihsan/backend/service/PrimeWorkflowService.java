@@ -33,17 +33,29 @@ public class PrimeWorkflowService {
         String department,
         String referenceId
     ) {
-        return frappeClient.postMethod(
-            "prime.mobile_api.create_que_from_mobile",
-            Map.of(
-                "patient", patientId,
-                "practitioner", practitionerId,
-                "appointment_date", appointmentDate,
-                "appointment_time", appointmentTime,
-                "department", department,
-                "reference_id", referenceId
-            )
-        );
+        return createQueFromMobile(patientId, practitionerId, appointmentDate, appointmentTime, department, referenceId, null, null);
+    }
+
+    public Map<String, Object> createQueFromMobile(
+        String patientId,
+        String practitionerId,
+        String appointmentDate,
+        String appointmentTime,
+        String department,
+        String referenceId,
+        java.math.BigDecimal paidAmount,
+        String modeOfPayment
+    ) {
+        Map<String, Object> params = new java.util.HashMap<>();
+        params.put("patient", patientId);
+        params.put("practitioner", practitionerId);
+        params.put("appointment_date", appointmentDate);
+        params.put("appointment_time", appointmentTime);
+        params.put("department", department);
+        params.put("reference_id", referenceId);
+        if (paidAmount != null) params.put("paid_amount", paidAmount.toPlainString());
+        if (modeOfPayment != null) params.put("mode_of_payment", modeOfPayment);
+        return frappeClient.postMethod("prime.mobile_api.create_que_from_mobile", params);
     }
 
     @SuppressWarnings("unchecked")
