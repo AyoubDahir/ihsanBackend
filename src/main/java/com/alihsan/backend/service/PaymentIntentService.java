@@ -76,7 +76,7 @@ public class PaymentIntentService {
             intent.getDepartment(),
             intent.getReferenceId(),
             intent.getAmount(),
-            intent.getPaymentType()
+            "Waafi"
         );
 
         if (result.containsKey("exc_type") || result.containsKey("exception")) {
@@ -118,7 +118,7 @@ public class PaymentIntentService {
                 intent.getDepartment(),
                 intent.getReferenceId(),
                 intent.getAmount(),
-                intent.getPaymentType()
+                "Waafi"
             );
 
             // Check for error response from Prime API
