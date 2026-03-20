@@ -12,6 +12,8 @@ import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.stereotype.Component;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -53,10 +55,11 @@ public class FrappeClient {
 
     public Map<String, Object> getResource(String resourcePath, Map<String, Object> queryParams) {
         try {
+            String encodedPath = URLEncoder.encode(resourcePath, StandardCharsets.UTF_8).replace("+", "%20");
             String queryString = queryParams.entrySet().stream()
-                .map(e -> e.getKey() + "=" + e.getValue())
+                .map(e -> URLEncoder.encode(e.getKey(), StandardCharsets.UTF_8) + "=" + URLEncoder.encode(String.valueOf(e.getValue()), StandardCharsets.UTF_8))
                 .collect(Collectors.joining("&"));
-            String url = baseUrl + "/api/resource/" + resourcePath + (queryString.isEmpty() ? "" : "?" + queryString);
+            String url = baseUrl + "/api/resource/" + encodedPath + (queryString.isEmpty() ? "" : "?" + queryString);
             
             HttpGet request = new HttpGet(url);
             request.setHeader("Content-Type", "application/json");
