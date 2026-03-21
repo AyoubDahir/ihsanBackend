@@ -5,6 +5,7 @@ import com.alihsan.backend.dto.LabReportView;
 import com.alihsan.backend.dto.PatientAppointmentView;
 import com.alihsan.backend.dto.PractitionerSlotView;
 import com.alihsan.backend.dto.PractitionerView;
+import com.alihsan.backend.dto.QueueStatusView;
 import com.alihsan.backend.integration.FrappeClient;
 import com.alihsan.backend.util.MobileNumberUtil;
 import org.springframework.stereotype.Service;
