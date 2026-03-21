@@ -42,6 +42,10 @@
       "value": ""
     },
     {
+      "key": "queId",
+      "value": ""
+    },
+    {
       "key": "invoiceId",
       "value": ""
     },
@@ -249,6 +253,14 @@
       }
     },
     {
+      "name": "Healthcare Queue Status",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/api/healthcare/queue/status?queId={{queId}}"
+      }
+    },
+    {
       "name": "Billing List Unpaid Invoices",
       "request": {
         "method": "GET",
@@ -353,7 +365,19 @@
         "method": "GET",
         "header": [],
         "url": "{{baseUrl}}/api/payment/verify/{{appointmentReferenceId}}"
-      }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "const j = pm.response.json();",
+              "if (j && j.primeQue) pm.collectionVariables.set('queId', j.primeQue);"
+            ]
+          }
+        }
+      ]
     },
     {
       "name": "Payment Verify Invoice Reference",
