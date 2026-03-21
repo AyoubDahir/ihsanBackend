@@ -309,6 +309,28 @@ public class PrimeWorkflowService {
     }
 
     @SuppressWarnings("unchecked")
+    public QueueStatusView getQueueStatus(String queId) {
+        Map<String, Object> response = frappeClient.postMethod(
+            "prime.api.queue_display_api.get_queue_status",
+            Map.of("que_name", queId)
+        );
+        Map<String, Object> msg = (Map<String, Object>) response.getOrDefault("message", Map.of());
+        boolean found = Boolean.TRUE.equals(msg.get("found"));
+        if (!found) return new QueueStatusView(false, null, null, null, null, null, null, null, null);
+        return new QueueStatusView(
+            true,
+            asString(msg.get("que")),
+            msg.get("token_no") instanceof Number n ? n.intValue() : null,
+            asString(msg.get("patient_name")),
+            asString(msg.get("practitioner_name")),
+            asString(msg.get("department")),
+            asString(msg.get("status")),
+            asString(msg.get("que_steps")),
+            msg.get("patients_ahead") instanceof Number n ? n.intValue() : null
+        );
+    }
+
+    @SuppressWarnings("unchecked")
     public List<LabReportView> getLabReports(String patientId) {
         Map<String, Object> response = frappeClient.postMethod(
             "prime.mobile_api.get_lab_reports_for_mobile",

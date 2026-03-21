@@ -3,6 +3,7 @@ package com.alihsan.backend.controller;
 import com.alihsan.backend.dto.CreateAppointmentIntentRequest;
 import com.alihsan.backend.dto.CreateAppointmentIntentResponse;
 import com.alihsan.backend.dto.LabReportView;
+import com.alihsan.backend.dto.QueueStatusView;
 import com.alihsan.backend.dto.PatientAppointmentView;
 import com.alihsan.backend.dto.PractitionerSlotView;
 import com.alihsan.backend.dto.PractitionerView;
@@ -62,5 +63,10 @@ public class HealthcareController {
     @GetMapping("/lab-reports")
     public List<LabReportView> getLabReports(@RequestParam("patientId") String patientId) {
         return primeWorkflowService.getLabReports(patientId);
+    }
+
+    @GetMapping("/queue/status")
+    public QueueStatusView getQueueStatus(@RequestParam("queId") String queId) {
+        return primeWorkflowService.getQueueStatus(queId);
     }
 }
