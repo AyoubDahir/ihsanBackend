@@ -284,11 +284,11 @@ public class PrimeWorkflowService {
     @SuppressWarnings("unchecked")
     public List<PatientAppointmentView> getAppointments(String patientId) {
         Map<String, Object> response = frappeClient.getResource(
-            "Patient Appointment",
+            "Que",
             Map.of(
-                "fields", "[\"name\",\"patient\",\"practitioner\",\"practitioner_name\",\"appointment_date\",\"appointment_time\",\"status\",\"department\"]",
+                "fields", "[\"name\",\"patient\",\"practitioner\",\"practitioner_name\",\"date\",\"time\",\"status\",\"department\"]",
                 "filters", "[[\"patient\",\"=\",\"" + patientId + "\"]]",
-                "order_by", "appointment_date desc"
+                "order_by", "date desc"
             )
         );
         List<Map<String, Object>> rows = (List<Map<String, Object>>) response.getOrDefault("data", List.of());
@@ -299,8 +299,8 @@ public class PrimeWorkflowService {
                 asString(row.get("patient")),
                 asString(row.get("practitioner")),
                 asString(row.get("practitioner_name")),
-                asString(row.get("appointment_date")),
-                asString(row.get("appointment_time")),
+                asString(row.get("date")),
+                asString(row.get("time")),
                 asString(row.get("status")),
                 asString(row.get("department"))
             ));
