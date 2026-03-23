@@ -57,7 +57,7 @@ public class PrimeWorkflowService {
         params.put("reference_id", referenceId);
         if (paidAmount != null) params.put("paid_amount", paidAmount.toPlainString());
         if (modeOfPayment != null) params.put("mode_of_payment", modeOfPayment);
-        return frappeClient.postMethod("prime.mobile_api.create_que_from_mobile", params);
+        return frappeClient.postMethod("prime.api.mobile_api.create_que_from_mobile", params);
     }
 
     @SuppressWarnings("unchecked")
@@ -138,7 +138,7 @@ public class PrimeWorkflowService {
         }
 
         Map<String, Object> response = frappeClient.postMethod(
-            "prime.mobile_api.register_patient_from_mobile",
+            "prime.api.mobile_api.register_patient_from_mobile",
             Map.of(
                 "first_name", normalizedFirstName,
                 "last_name", normalizedLastName,
@@ -237,7 +237,7 @@ public class PrimeWorkflowService {
     @SuppressWarnings("unchecked")
     public List<BillingInvoiceView> getUnpaidInvoices(String patientId) {
         Map<String, Object> response = frappeClient.postMethod(
-            "prime.mobile_api.get_unpaid_sales_invoices_for_mobile",
+            "prime.api.mobile_api.get_unpaid_sales_invoices_for_mobile",
             Map.of("patient", patientId, "limit", 100)
         );
         List<Map<String, Object>> rows = (List<Map<String, Object>>) response.getOrDefault("message", List.of());
@@ -277,7 +277,7 @@ public class PrimeWorkflowService {
         payload.put("reference_id", referenceId);
         payload.put("provider_txn_id", providerTxnId);
         return frappeClient.postMethod(
-            "prime.mobile_api.mark_sales_invoice_paid_from_mobile",
+            "prime.api.mobile_api.mark_sales_invoice_paid_from_mobile",
             payload
         );
     }
@@ -334,7 +334,7 @@ public class PrimeWorkflowService {
     @SuppressWarnings("unchecked")
     public List<LabReportView> getLabReports(String patientId) {
         Map<String, Object> response = frappeClient.postMethod(
-            "prime.mobile_api.get_lab_reports_for_mobile",
+            "prime.api.mobile_api.get_lab_reports_for_mobile",
             Map.of("patient", patientId, "limit", 50)
         );
         List<Map<String, Object>> rows = (List<Map<String, Object>>) response.getOrDefault("message", List.of());
