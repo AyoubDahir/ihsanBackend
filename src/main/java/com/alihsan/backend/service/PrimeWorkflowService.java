@@ -19,9 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
 import java.util.StringJoiner;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 public class PrimeWorkflowService {
@@ -29,11 +27,14 @@ public class PrimeWorkflowService {
 
     private final FrappeClient frappeClient;
     private final SmsService smsService;
-    private final Set<String> calledSmsSent = ConcurrentHashMap.newKeySet();
 
     public PrimeWorkflowService(FrappeClient frappeClient, SmsService smsService) {
         this.frappeClient = frappeClient;
         this.smsService = smsService;
+    }
+
+    public void sendCalledSms(String mobile, String patientName) {
+        smsService.sendCalledSms(mobile, patientName);
     }
 
     @SuppressWarnings("unchecked")
@@ -376,10 +377,6 @@ public class PrimeWorkflowService {
         if (!found) return new QueueStatusView(false, null, null, null, null, null, null, null, null);
 
         String status = asString(msg.get("status"));
-        String patientName = asString(msg.get("patient_name"));
-        if ("Called".equals(status) && calledSmsSent.add(queId)) {
-            trySendCalledSms(queId, patientName);
-        }
 
         return new QueueStatusView(
             true,
@@ -392,27 +389,6 @@ public class PrimeWorkflowService {
             asString(msg.get("que_steps")),
             msg.get("patients_ahead") instanceof Number n ? n.intValue() : null
         );
-    }
-
-    @SuppressWarnings("unchecked")
-    private void trySendCalledSms(String queId, String patientName) {
-        try {
-            Map<String, Object> queDoc = frappeClient.getResource("Que/" + queId, Map.of());
-            Map<String, Object> data = (Map<String, Object>) queDoc.get("data");
-            String patientId = asString(data != null ? data.get("patient") : null);
-            if (patientId == null || patientId.isBlank()) return;
-
-            Map<String, Object> patientDoc = frappeClient.getResource("Patient/" + patientId, Map.of());
-            Map<String, Object> patData = (Map<String, Object>) patientDoc.get("data");
-            String mobile = asString(patData != null ? patData.get("mobile") : null);
-            if (mobile == null || mobile.isBlank()) return;
-
-            smsService.sendCalledSms(mobile, patientName);
-            log.info("Called SMS sent for que={} patient={}", queId, patientId);
-        } catch (Exception e) {
-            log.warn("Failed to send called SMS for que={}: {}", queId, e.getMessage());
-            calledSmsSent.remove(queId); // allow retry on next poll
-        }
     }
 
     @SuppressWarnings("unchecked")

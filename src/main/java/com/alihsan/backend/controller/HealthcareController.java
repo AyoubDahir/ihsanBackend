@@ -69,4 +69,13 @@ public class HealthcareController {
     public QueueStatusView getQueueStatus(@RequestParam("queId") String queId) {
         return primeWorkflowService.getQueueStatus(queId);
     }
+
+    @PostMapping("/queue/called-sms")
+    public void sendCalledSms(@RequestBody java.util.Map<String, String> body) {
+        String mobile = body.get("mobile");
+        String patientName = body.getOrDefault("patientName", "");
+        if (mobile != null && !mobile.isBlank()) {
+            primeWorkflowService.sendCalledSms(mobile, patientName);
+        }
+    }
 }
