@@ -37,6 +37,11 @@ public class BillingController {
         return primeWorkflowService.getUnpaidInvoices(patientId);
     }
 
+    @GetMapping("/invoices/paid")
+    public List<BillingInvoiceView> getPaidInvoices(@RequestParam("patientId") String patientId) {
+        return primeWorkflowService.getPaidInvoices(patientId);
+    }
+
     @GetMapping("/invoices/{invoiceId}")
     public BillingInvoiceView getInvoice(
         @PathVariable String invoiceId,
