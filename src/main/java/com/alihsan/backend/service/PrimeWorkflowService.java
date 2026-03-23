@@ -243,6 +243,17 @@ public class PrimeWorkflowService {
         List<Map<String, Object>> rows = (List<Map<String, Object>>) response.getOrDefault("message", List.of());
         List<BillingInvoiceView> out = new ArrayList<>();
         for (Map<String, Object> row : rows) {
+            List<Map<String, Object>> items = new ArrayList<>();
+            Object rawItems = row.get("items");
+            if (rawItems instanceof List<?> rawList) {
+                for (Object item : rawList) {
+                    if (item instanceof Map<?, ?> itemMap) {
+                        Map<String, Object> mapped = new java.util.LinkedHashMap<>();
+                        itemMap.forEach((k, v) -> mapped.put(String.valueOf(k), v));
+                        items.add(mapped);
+                    }
+                }
+            }
             out.add(new BillingInvoiceView(
                 asString(row.get("name")),
                 asString(row.get("posting_date")),
@@ -250,7 +261,8 @@ public class PrimeWorkflowService {
                 asString(row.get("status")),
                 asString(row.get("currency")),
                 asString(row.get("grand_total")),
-                asString(row.get("outstanding_amount"))
+                asString(row.get("outstanding_amount")),
+                items
             ));
         }
         return out;
