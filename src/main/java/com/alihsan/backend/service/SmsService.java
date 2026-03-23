@@ -20,6 +20,34 @@ public class SmsService {
         this.webClient = WebClient.builder().build();
     }
 
+    public void sendCalledSms(String mobile, String patientName) {
+        validateConfig();
+        String normalized = MobileNumberUtil.normalize(mobile);
+        if (normalized == null || normalized.isBlank()) return;
+
+        String localMobile = normalized.startsWith("252") ? normalized.substring(3) : normalized;
+        String token = getAccessToken();
+        String message = "Salam " + patientName + ",\n\n" +
+            "Waqtigii ballantaadu waa la gaadhay. Fadlan si degdeg ah ugu gudub dhakhtarka.\n\n" +
+            "Fadlan ogow: haddii aadan waqtigan ku iman, waxaa la siin doonaa fursadda bukaanka kugu xiga.\n\n" +
+            "Mahadsanid,\nAl-Ihsan Hospital";
+
+        Map<String, Object> payload = Map.of(
+            "senderid", smsProperties.senderId(),
+            "mobile", localMobile,
+            "message", message
+        );
+
+        webClient.post()
+            .uri(smsProperties.sendUrl())
+            .contentType(MediaType.APPLICATION_JSON)
+            .headers(h -> h.setBearerAuth(token))
+            .bodyValue(payload)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
+    }
+
     public void sendOtp(String mobile, String otp) {
         validateConfig();
         String normalized = MobileNumberUtil.normalize(mobile);
