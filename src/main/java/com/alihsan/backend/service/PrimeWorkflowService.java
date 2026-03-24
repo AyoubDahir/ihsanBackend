@@ -5,6 +5,8 @@ import com.alihsan.backend.dto.LabReportView;
 import com.alihsan.backend.dto.PatientAppointmentView;
 import com.alihsan.backend.dto.PractitionerSlotView;
 import com.alihsan.backend.dto.PractitionerView;
+import com.alihsan.backend.dto.PrescriptionDrugView;
+import com.alihsan.backend.dto.PrescriptionView;
 import com.alihsan.backend.dto.QueueStatusView;
 import com.alihsan.backend.integration.FrappeClient;
 import com.alihsan.backend.util.MobileNumberUtil;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 @Service
 public class PrimeWorkflowService {
@@ -389,6 +392,38 @@ public class PrimeWorkflowService {
             asString(msg.get("que_steps")),
             msg.get("patients_ahead") instanceof Number n ? n.intValue() : null
         );
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<PrescriptionView> getPrescriptions(String patientId) {
+        Map<String, Object> response = frappeClient.postMethod(
+            "prime.api.mobile_api.get_drug_prescriptions_for_mobile",
+            Map.of("patient", patientId, "limit", 50)
+        );
+        List<Map<String, Object>> rows = (List<Map<String, Object>>) response.getOrDefault("message", List.of());
+        List<PrescriptionView> result = new ArrayList<>();
+        for (Map<String, Object> row : rows) {
+            List<Map<String, Object>> drugRows = (List<Map<String, Object>>) row.getOrDefault("drugs", List.of());
+            List<PrescriptionDrugView> drugs = drugRows.stream()
+                .map(d -> new PrescriptionDrugView(
+                    asString(d.get("drug_code")),
+                    asString(d.get("drug_name")),
+                    asString(d.get("qty")),
+                    asString(d.get("dosage")),
+                    asString(d.get("period")),
+                    asString(d.get("route")),
+                    asString(d.get("instraction"))
+                ))
+                .collect(Collectors.toList());
+            result.add(new PrescriptionView(
+                asString(row.get("encounter")),
+                asString(row.get("date")),
+                asString(row.get("practitioner")),
+                asString(row.get("practitioner_name")),
+                drugs
+            ));
+        }
+        return result;
     }
 
     @SuppressWarnings("unchecked")
