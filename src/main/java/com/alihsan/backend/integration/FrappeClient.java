@@ -37,17 +37,29 @@ public class FrappeClient {
         try {
             String url = baseUrl + "/api/method/" + methodPath;
             String jsonBody = objectMapper.writeValueAsString(payload);
-            
+
             HttpPost request = new HttpPost(url);
             request.setHeader("Content-Type", "application/json");
             request.setHeader("Authorization", token);
             request.setHeader("Host", host);
             request.setEntity(new StringEntity(jsonBody, ContentType.APPLICATION_JSON));
-            
+
             return httpClient.execute(request, response -> {
                 String body = EntityUtils.toString(response.getEntity());
-                return objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+                int status = response.getCode();
+                Map<String, Object> parsed = objectMapper.readValue(body, new TypeReference<Map<String, Object>>() {});
+                if (status >= 400) {
+                    String excType = String.valueOf(parsed.getOrDefault("exc_type", ""));
+                    String exception = String.valueOf(parsed.getOrDefault("exception", ""));
+                    String serverMessages = String.valueOf(parsed.getOrDefault("_server_messages", ""));
+                    throw new RuntimeException("Frappe error [HTTP " + status + "] exc_type=" + excType
+                            + " | " + (exception.length() > 300 ? exception.substring(0, 300) : exception)
+                            + (serverMessages.length() > 2 ? " | server_messages=" + serverMessages : ""));
+                }
+                return parsed;
             });
+        } catch (RuntimeException e) {
+            throw e;
         } catch (Exception e) {
             throw new RuntimeException("Failed to call Prime API: " + e.getMessage(), e);
         }

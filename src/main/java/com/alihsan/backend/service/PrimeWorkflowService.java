@@ -163,9 +163,14 @@ public class PrimeWorkflowService {
             )
         );
 
-        Map<String, Object> message = (Map<String, Object>) response.get("message");
-        if (message == null || message.get("patient") == null) {
-            throw new IllegalStateException("Prime registration response did not include patient id");
+        Object rawMessage = response.get("message");
+        if (!(rawMessage instanceof Map)) {
+            throw new IllegalStateException("Prime registration failed — unexpected response: " + rawMessage);
+        }
+        @SuppressWarnings("unchecked")
+        Map<String, Object> message = (Map<String, Object>) rawMessage;
+        if (message.get("patient") == null) {
+            throw new IllegalStateException("Prime registration response did not include patient id. Response: " + message);
         }
         return String.valueOf(message.get("patient"));
     }
