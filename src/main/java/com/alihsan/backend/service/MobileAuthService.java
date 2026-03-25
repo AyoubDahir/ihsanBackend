@@ -76,11 +76,6 @@ public class MobileAuthService {
         if (normalizedMobile == null || normalizedMobile.isBlank()) {
             throw new IllegalArgumentException("mobile is required");
         }
-        Map<String, String> patient = primeWorkflowService.findPatientByMobile(normalizedMobile);
-        if (patient == null) {
-            throw new IllegalArgumentException("Patient with this mobile does not exist. Complete signup first.");
-        }
-
         String otpCode = generateOtp();
         smsService.sendOtp(normalizedMobile, otpCode);
 
