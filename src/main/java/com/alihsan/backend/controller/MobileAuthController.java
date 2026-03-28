@@ -14,11 +14,13 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.alihsan.backend.util.MobileNumberUtil;
 
 @RestController
 @RequestMapping("/api/mobile/auth")
 public class MobileAuthController {
     private final MobileAuthService mobileAuthService;
+    private final MobileNumberUtil util;
 
     public MobileAuthController(MobileAuthService mobileAuthService) {
         this.mobileAuthService = mobileAuthService;
@@ -45,7 +47,7 @@ public class MobileAuthController {
             request.firstName(),
             request.lastName(),
             request.fullName(),
-            request.mobile(),
+            util.normalize(request.mobile()),
             request.sex(),
             request.age(),
             request.ageType()

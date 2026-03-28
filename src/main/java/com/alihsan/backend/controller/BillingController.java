@@ -18,8 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RestController
-@RequestMapping("/api/billing")
+`
 public class BillingController {
     private final PrimeWorkflowService primeWorkflowService;
     private final InvoicePaymentIntentService invoicePaymentIntentService;
