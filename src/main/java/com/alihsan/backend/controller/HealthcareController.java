@@ -84,4 +84,14 @@ public class HealthcareController {
             primeWorkflowService.sendCalledSms(mobile, patientName);
         }
     }
+
+    @PostMapping("/lab/result-ready")
+    public void sendLabResultReady(@RequestBody java.util.Map<String, String> body) {
+        String mobile = body.get("mobile");
+        String patientName = body.getOrDefault("patientName", "");
+        String labTestName = body.getOrDefault("labTestName", "Lab Test");
+        if (mobile != null && !mobile.isBlank()) {
+            primeWorkflowService.sendLabResultSms(mobile, patientName, labTestName);
+        }
+    }
 }

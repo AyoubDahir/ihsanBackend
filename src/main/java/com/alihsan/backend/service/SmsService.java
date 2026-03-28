@@ -48,6 +48,34 @@ public class SmsService {
             .block();
     }
 
+    public void sendLabResultSms(String mobile, String patientName, String labTestName) {
+        validateConfig();
+        String normalized = MobileNumberUtil.normalize(mobile);
+        if (normalized == null || normalized.isBlank()) return;
+
+        String localMobile = normalized.startsWith("252") ? normalized.substring(3) : normalized;
+        String token = getAccessToken();
+        String message = "Salam " + patientName + ",\n\n" +
+            "Natiijadaada baaritaanka (" + labTestName + ") waa diyaar.\n\n" +
+            "Fadlan fur abka Alihsan ama ku yimaad isbitaalka si aad u aragto natiijadaada.\n\n" +
+            "Mahadsanid,\nAl-Ihsan Hospital";
+
+        Map<String, Object> payload = Map.of(
+            "senderid", smsProperties.senderId(),
+            "mobile", localMobile,
+            "message", message
+        );
+
+        webClient.post()
+            .uri(smsProperties.sendUrl())
+            .contentType(MediaType.APPLICATION_JSON)
+            .headers(h -> h.setBearerAuth(token))
+            .bodyValue(payload)
+            .retrieve()
+            .bodyToMono(String.class)
+            .block();
+    }
+
     public void sendOtp(String mobile, String otp) {
         validateConfig();
         String normalized = MobileNumberUtil.normalize(mobile);

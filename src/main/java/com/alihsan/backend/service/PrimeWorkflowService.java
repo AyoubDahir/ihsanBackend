@@ -40,6 +40,10 @@ public class PrimeWorkflowService {
         smsService.sendCalledSms(mobile, patientName);
     }
 
+    public void sendLabResultSms(String mobile, String patientName, String labTestName) {
+        smsService.sendLabResultSms(mobile, patientName, labTestName);
+    }
+
     @SuppressWarnings("unchecked")
     public Map<String, Object> createQueFromMobile(
         String patientId,
